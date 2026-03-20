@@ -16,7 +16,6 @@ bool validaMatriz(const vector<string> &dna)
         {
             return false;
         }
-
         // Valida que as caracteres sejam somente as que estão no DNA
         for (char c : linha)
         {
