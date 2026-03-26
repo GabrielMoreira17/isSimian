@@ -1,54 +1,31 @@
+#include "httplib.h"
+#include "json.hpp"
 #include <iostream>
-#include <string>
 #include <vector>
 
+using json = nlohmann::json;
 using namespace std;
 
-// Função que vai montar e validar a matriz para garantir que será NxN
-bool validaMatriz(const vector<string> &dna)
-{
-
-    int n = dna.size();
-
-    for (const string &linha : dna)
-    {
-        if (linha.size() != n)
-        {
-            return false;
-        }
-        // Valida que as caracteres sejam somente as que estão no DNA
-        for (char c : linha)
-        {
-            if (c != 'A' && c != 'T' && c != 'C' && c != 'G')
-            {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-// Função que vai verificar a sequência do DNA para validar se existe a sequência de 4 letras iguais
 bool isSimian(const vector<string> &dna)
 {
     int n = dna.size();
-    int cout = 0;
+    int count = 0;
 
-    // realiza a validação na horizontal
+    // Horizontal
     for (int i = 0; i < n; i++)
     {
-        for (int j = 0; j <= n; j++)
+        for (int j = 0; j <= n - 4; j++)
         {
             if (dna[i][j] == dna[i][j + 1] &&
                 dna[i][j] == dna[i][j + 2] &&
                 dna[i][j] == dna[i][j + 3])
             {
-                cout++;
+                count++;
             }
         }
     }
 
-    // Realiza a validação na vertical
+    // Vertical
     for (int i = 0; i <= n - 4; i++)
     {
         for (int j = 0; j < n; j++)
@@ -57,66 +34,81 @@ bool isSimian(const vector<string> &dna)
                 dna[i][j] == dna[i + 2][j] &&
                 dna[i][j] == dna[i + 3][j])
             {
-                cout++;
+                count++;
             }
         }
     }
 
-    // Realiza a validação na diagonal
+    // Diagonal principal
     for (int i = 0; i <= n - 4; i++)
     {
-        for (int j = 0; j < n; j++)
+        for (int j = 0; j <= n - 4; j++)
         {
-            if (dna[i][j] == dna[i + 1][j - 1] &&
-                dna[i][j] == dna[i + 2][j - 2] &&
-                dna[i][j] == dna[i + 3][j - 3])
+            if (dna[i][j] == dna[i + 1][j + 1] &&
+                dna[i][j] == dna[i + 2][j + 2] &&
+                dna[i][j] == dna[i + 3][j + 3])
             {
-                cout++;
+                count++;
             }
         }
     }
-    // Retorna Simian caso tenha 1 ou mais sequências
-    return cout;
+
+    return count >= 2;
+}
+
+bool validaMatriz(const vector<string> &dna)
+{
+    int n = dna.size();
+
+    for (const string &linha : dna)
+    {
+        if (linha.size() != n)
+            return false;
+
+        for (char c : linha)
+        {
+            if (c != 'A' && c != 'T' && c != 'C' && c != 'G')
+                return false;
+        }
+    }
+    return true;
 }
 
 int main()
 {
-    int n;
+    httplib::Server svr;
 
-    cout << "Digite o tamanho da matriz (N): ";
-    cin >> n;
+    svr.Post("/simian", [](const httplib::Request &req, httplib::Response &res)
+             {
+        try {
+            auto body = json::parse(req.body);
 
-    vector<string> dna;
+            vector<string> dna = body["dna"].get<vector<string>>();
 
-    cout << "Digite as sequencias de DNA: \n";
+            if (!validaMatriz(dna)) {
+                res.status = 400;
+                res.set_content("DNA inválido", "text/plain");
+                return;
+            }
 
-    for (int i = 0; i < n; i++)
-    {
-        string linha;
-        cin >> linha;
+            if (isSimian(dna)) {
+                res.status = 200;
+                res.set_content("Simian", "text/plain");
+            } else {
+                res.status = 403;
+                res.set_content("Human", "text/plain");
+            }
 
-        if (linha.size() != n)
-        {
-            cout << "Erro: matriz inválida!" << endl;
-            return 1;
-        }
+        } catch (...) {
+            res.status = 400;
+            res.set_content("Erro no JSON", "text/plain");
+        } });
 
-        dna.push_back(linha);
+    int port = 8080;
+    if (getenv("PORT")) {
+        port = stoi(getenv("PORT"));
     }
+    svr.listen("0.0.0.0", port);
 
-    if (!validaMatriz(dna))
-    {
-        cout << "DNA invalido" << endl;
-    }
-
-    if (isSimian(dna))
-    {
-        cout << "Resultado: Simian" << endl;
-    }
-    else
-    {
-        cout << "Resultado: Humano" << endl;
-    }
-
-    return 0;
+    cout << "API rodando em http://localhost:$`port`\n";
 }
