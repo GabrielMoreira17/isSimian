@@ -53,7 +53,7 @@ g++ main.cpp -o api -std=c++17 -pthread -lsqlite3
 A API será iniciada em:
 
 ```bash
-http://localhost:8080
+http://localhost:PORT
 ```
 
 Caso esteja em ambiente de nuvem, a porta será definida automaticamente pela variável `PORT`.
