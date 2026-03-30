@@ -110,7 +110,7 @@ int main()
 
     // SIMIAN
     svr.Post("/simian", [](const httplib::Request &req, httplib::Response &res)
-             {
+    {
         try {
             auto body = json::parse(req.body);
 
