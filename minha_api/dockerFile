@@ -1,0 +1,25 @@
+FROM ubuntu:22.04
+
+# Instala dependências
+RUN apt-get update && apt-get install -y \
+    g++ \
+    make \
+    cmake \
+    libsqlite3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copia arquivos
+COPY . .
+
+# Compila
+RUN g++ main.cpp -o api -std=c++17 -pthread -lsqlite3
+
+# Porta (Railway usa variável)
+ENV PORT=5555
+
+EXPOSE 5555
+
+# Executa
+CMD ["./api"]
