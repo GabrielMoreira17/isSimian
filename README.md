@@ -64,18 +64,6 @@ Caso esteja em ambiente de nuvem, a porta será definida automaticamente pela va
 
 ---
 
-### GET /teste
-
-Endpoint para verificação de funcionamento da API.
-
-#### Resposta
-
-```text
-API OK
-```
-
----
-
 ### POST /simian
 
 Verifica se uma sequência de DNA pertence a um símio.
