@@ -62,8 +62,6 @@ Caso esteja em ambiente de nuvem, a porta será definida automaticamente pela va
 
 ## Endpoints
 
----
-
 ### POST /simian
 
 Verifica se uma sequência de DNA pertence a um símio.
